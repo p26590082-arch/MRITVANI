@@ -1,0 +1,11 @@
+/**
+ * Atmospheric local fallback stories in English and Hindi
+ * when running in a pure static workspace (like Netlify).
+ */
+export function getFallbackStory(title: string, language: "en" | "hi"): string {
+  if (language === "hi") {
+    return `### ${title}\n\nसन्नाटा इतना गहरा था कि विक्रम की अपनी सांसें किसी बड़े जीव की आहट जैसी लग रही थीं।\n\nवह पुराना वीरान खंडहर, जिसे लोग 'मृत्यु-द्वार' कहते थे, सदियों से खाली पड़ा था। लेकिन आज रात, वहाँ कुछ था। विक्रम ने जैसे ही पैर अंदर रखा, दरवाज़ा अपने आप बंद हो गया। हवा में सड़ी हुई मिट्टी और प्राचीन राख की गंध तैर रही थी।\n\n**"तुम यहाँ अकेले नहीं हो..."** एक ठंडी फुसफुसाहट उसके कान के ठीक पास गूंजी।\n\nउसने मुड़कर देखा, तो वहाँ कोई नहीं था। केवल दीवार पर उसका अपना साया था, जो उसकी हरकतों के साथ नहीं, बल्कि खुद-ब-खुद हिल रहा था। वह साया दीवार से बाहर निकलने लगा था, उसके लंबे, नुकीले काले हाथ विक्रम के गले की तरफ बढ़ रहे थे। विक्रम चिल्लाना चाहता था, लेकिन उसका गला सूख चुका था, और पीछे खड़े साए ने मुस्कुराते हुए विक्रम का हाथ थाम लिया।\n\n---\n\n*नोट: यह कहानी ऑफ़लाइन मोड (Static Fallback) में लोड की गई है, क्योंकि चूँकि यह साइट नेटलिफ़ाई पर होस्ट की गई है जहाँ सर्वर-साइड AI जनरेशन उपलब्ध नहीं है!*`;
+  }
+
+  return `### ${title}\n\nThe darkness of the old asylum felt alive, breathing slowly in tandem with Damien's ragged gasps.\n\nHe had climbed through the broken window expecting nothing more than graffiti and dust. Instead, the air was freezing—a unnatural cold that seeped directly into his marrow. As his flashlight flickered, Damien noticed that his shadow on the wall was not mimicking his movements. It stood perfectly still, turning its head slowly to stare back at him.\n\n**"You should not have unsealed the corridor,"** a low, rattling rasp echoed from the ceiling.\n\nDrip. Drip. A dark, viscous liquid fell onto his shoulder. Damien looked up. Clinging to the dark concrete rafters was a figure draped in pale, waterlogged tatters. Its eyes were two hollow voids of absolute blackness, wide with an ancient hunger. It smiled, revealing rows of jagged, needle-like ivory teeth as it descended without a sound.\n\n---\n\n*Note: This story is loaded in offline fallback mode because the application is deployed on a static hosting architecture like Netlify, where the background Express AI server is not active!*`;
+}

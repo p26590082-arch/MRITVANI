@@ -9,30 +9,26 @@ import { Ghost, Search, BookOpen, Skull, Info } from "lucide-react";
 import { StoryCard } from "./components/StoryCard.tsx";
 import { StoryReader } from "./components/StoryReader.tsx";
 import { AdPlaceholder } from "./components/AdPlaceholder.tsx";
-
-interface Story {
-  id: string;
-  title: string;
-  category: string;
-  icon: string;
-}
+import { staticStories, type Story } from "./data/stories.ts";
 
 export default function App() {
-  const [stories, setStories] = useState<Story[]>([]);
+  const [stories, setStories] = useState<Story[]>(staticStories);
   const [selectedStory, setSelectedStory] = useState<Story | null>(null);
   const [search, setSearch] = useState("");
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     const fetchStories = async () => {
       try {
         const res = await fetch("/api/stories");
-        const data = await res.json();
-        setStories(data);
+        if (res.ok) {
+          const data = await res.json();
+          if (Array.isArray(data) && data.length > 0) {
+            setStories(data);
+          }
+        }
       } catch (err) {
-        console.error(err);
-      } finally {
-        setLoading(false);
+        console.warn("Express backend offline or static environment. Using static story list.", err);
       }
     };
     fetchStories();

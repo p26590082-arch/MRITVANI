@@ -1,11 +1,12 @@
 import { useState, useEffect } from "react";
 import ReactMarkdown from "react-markdown";
 import { motion, AnimatePresence } from "motion/react";
-import { X, Play, Pause, Languages, Loader2, Sparkles } from "lucide-react";
+import { X, Play, Pause, Languages, Loader2, Sparkles, AlertCircle } from "lucide-react";
 import { AudioPlayer } from "./AudioPlayer.tsx";
 
 import { pcmToWavUrl } from "../lib/audioUtils.ts";
 import { AdPlaceholder } from "./AdPlaceholder.tsx";
+import { getFallbackStory } from "../lib/fallbackStories.ts";
 
 interface StoryReaderProps {
   story: {
@@ -22,12 +23,14 @@ export function StoryReader({ story, onClose }: StoryReaderProps) {
   const [loading, setLoading] = useState(false);
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
   const [generatingAudio, setGeneratingAudio] = useState(false);
+  const [audioMessage, setAudioMessage] = useState<string | null>(null);
 
   useEffect(() => {
     if (story) {
       fetchContent();
-      // Reset audio when story changes
+      // Reset audio and alerts when story changes
       setAudioUrl(null);
+      setAudioMessage(null);
     }
   }, [story, lang]);
 
@@ -40,10 +43,14 @@ export function StoryReader({ story, onClose }: StoryReaderProps) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ id: story.id, title: story.title, language: lang }),
       });
+      if (!res.ok) {
+        throw new Error("Backend offline");
+      }
       const data = await res.json();
       setContent(data.content);
     } catch (err) {
-      console.error(err);
+      console.warn("Express backend offline. Loading local immersive story.");
+      setContent(getFallbackStory(story.title, lang));
     } finally {
       setLoading(false);
     }
@@ -52,12 +59,16 @@ export function StoryReader({ story, onClose }: StoryReaderProps) {
   const generateAudio = async () => {
     if (!content || generatingAudio) return;
     setGeneratingAudio(true);
+    setAudioMessage(null);
     try {
       const res = await fetch("/api/tts", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ text: content, language: lang }),
       });
+      if (!res.ok) {
+        throw new Error("Express backend offline or audio quota exceeded");
+      }
       const data = await res.json();
       if (data.audio) {
         let url = "";
@@ -71,7 +82,8 @@ export function StoryReader({ story, onClose }: StoryReaderProps) {
         setAudioUrl(url);
       }
     } catch (err) {
-      console.error(err);
+      console.warn("TTS generation requires active Node.js server:", err);
+      setAudioMessage("AI Narrator requires a running server. Static hosting (like Netlify) only serves the front-end layout! Deploy on Google Cloud Run to experience AI audio narration.");
     } finally {
       setGeneratingAudio(false);
     }
@@ -146,8 +158,19 @@ export function StoryReader({ story, onClose }: StoryReaderProps) {
         </div>
 
         {/* Footer / Audio Controls */}
-        <div className="h-24 bg-zinc-950 border-t border-white/10 px-10 flex items-center justify-center relative overflow-hidden">
+        <div className="min-h-24 py-6 bg-zinc-950 border-t border-white/10 px-10 flex flex-col items-center justify-center gap-4 relative overflow-hidden">
           <div className="absolute top-0 left-0 w-full h-[1px] bg-red-900/10"></div>
+          
+          {audioMessage && (
+            <motion.div 
+              initial={{ opacity: 0, y: 5 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="text-[10px] uppercase text-center max-w-md flex items-center gap-2 font-mono border border-red-950/50 bg-red-950/10 rounded-sm p-3 text-red-400"
+            >
+              <AlertCircle size={14} className="shrink-0 text-red-800" />
+              <span>{audioMessage}</span>
+            </motion.div>
+          )}
           
           {!audioUrl ? (
             <button
